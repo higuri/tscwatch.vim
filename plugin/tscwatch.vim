@@ -13,7 +13,8 @@ let g:loaded_tscwatch = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-command! TscWatch call tscwatch#tscwatch()
+command! -nargs=? TscWatchStart call tscwatch#start(<f-args>)
+command! -nargs=0 TscWatchStop call tscwatch#stop()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
