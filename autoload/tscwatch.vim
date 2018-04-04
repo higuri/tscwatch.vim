@@ -3,7 +3,7 @@
 "
 
 let s:curdir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-let s:pyfile = s:curdir . '/python/test.py'
+let s:pyfile = s:curdir . '/python/tscwatch.py'
 execute 'py3file ' . s:pyfile
 python3 import vim
 
