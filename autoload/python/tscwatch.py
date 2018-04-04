@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 #
-# test.py
+# tscwatch.py
 #
 
+import re
 from threading import Thread 
 from subprocess import Popen, PIPE
 
 # TODO: cleanup
 tscwatch_thread = None
 
-# vim -> py -> 
-#           -> th1 -> call tsc & wait 
+# TscWatchThread:
 class TscWatchThread(Thread):
 
     CMD = ['tsc', '--watch']
+    PAT = re.compile(r'Starting .*compilation.*\.\.\.')
 
     def __init__(self, args):
         Thread.__init__(self)
@@ -23,14 +24,21 @@ class TscWatchThread(Thread):
     def run(self):
         cmd = self.CMD + self.args
         self.proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        vim.command('copen')
         while True:
             try:
                 line = self.proc.stdout.readline()
                 if line == b'':
                     break
                 s = line.decode('utf-8').strip()
-                if s != '':
-                    print(s)
+                if s == '':
+                    continue
+                if self.PAT.search(s) is not None:
+                    # Clear quickfix list.
+                    vim.command('call setqflist([], "r")')
+                    vim.command('call setqflist([], "r", {"title": "%s"})' % ' '.join(cmd))
+                vim.command('caddexpr "%s"' % s)
+                vim.command('redraw')
             except:
                 break
 
@@ -40,7 +48,7 @@ class TscWatchThread(Thread):
 # tscwatch_start:
 def tscwatch_start(args):
     global tscwatch_thread
-    if tscwatch_thread:
+    if tscwatch_thread and tscwatch_thread.is_alive():
         print('Already started')
     else:
         tscwatch_thread = TscWatchThread(args)
@@ -57,9 +65,9 @@ def tscwatch_stop():
     else:
         pass
 
-'''
+"""
 if __name__ == '__main__':
     tscwatch_start(['test.ts'])
     input('')
     tscwatch_stop()
-'''
+"""
