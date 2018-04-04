@@ -40,15 +40,22 @@ class TscWatchThread(Thread):
 # tscwatch_start:
 def tscwatch_start(args):
     global tscwatch_thread
-    tscwatch_thread = TscWatchThread(args)
-    tscwatch_thread.start()
+    if tscwatch_thread:
+        print('Already started')
+    else:
+        tscwatch_thread = TscWatchThread(args)
+        tscwatch_thread.start()
 
 # tscwatch_stop:
 # TODO: autoexec stop on vim exit.
 def tscwatch_stop():
     global tscwatch_thread
-    tscwatch_thread.stop()
-    tscwatch_thread.join()
+    if tscwatch_thread:
+        tscwatch_thread.stop()
+        tscwatch_thread.join()
+        tscwatch_thread = None
+    else:
+        pass
 
 '''
 if __name__ == '__main__':

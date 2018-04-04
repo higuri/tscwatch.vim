@@ -15,6 +15,7 @@ set cpo&vim
 
 command! -nargs=* TscWatchStart call tscwatch#start(<f-args>)
 command! -nargs=0 TscWatchStop call tscwatch#stop()
+autocmd VimLeave * call tscwatch#stop()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
