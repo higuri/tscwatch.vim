@@ -4,13 +4,13 @@
 
 let s:curdir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let s:pyfile = s:curdir . '/python/test.py'
-execute 'pyxfile ' . s:pyfile
-pythonx import vim
+execute 'py3file ' . s:pyfile
+python3 import vim
 
-function! tscwatch#start(args)
-    pythonx tscwatch_start(vim.eval('a:args'))
+function! tscwatch#start(...)
+    python3 tscwatch_start(vim.eval('a:000'))
 endfunction
 
 function! tscwatch#stop()
-    pythonx tscwatch_stop()
+    python3 tscwatch_stop()
 endfunction

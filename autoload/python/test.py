@@ -15,23 +15,22 @@ class TscWatchThread(Thread):
 
     CMD = ['tsc', '--watch']
 
-    def __init__(self, arg):
+    def __init__(self, args):
         Thread.__init__(self)
-        self.arg = arg
+        self.args = args
         self.proc = None
 
     def run(self):
-        cmd = self.CMD + [self.arg]
+        cmd = self.CMD + self.args
         self.proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
         while True:
             try:
                 line = self.proc.stdout.readline()
-                if line != b'':
-                    s = line.strip()
-                    if s != b'':
-                        print(s)
-                else:
+                if line == b'':
                     break
+                s = line.decode('utf-8').strip()
+                if s != '':
+                    print(s)
             except:
                 break
 
@@ -39,20 +38,21 @@ class TscWatchThread(Thread):
         self.proc.kill()
 
 # tscwatch_start:
-def tscwatch_start(arg):
+def tscwatch_start(args):
     global tscwatch_thread
-    tscwatch_thread = TscWatchThread(arg)
+    tscwatch_thread = TscWatchThread(args)
     tscwatch_thread.start()
 
 # tscwatch_stop:
+# TODO: autoexec stop on vim exit.
 def tscwatch_stop():
     global tscwatch_thread
     tscwatch_thread.stop()
     tscwatch_thread.join()
 
-"""
+'''
 if __name__ == '__main__':
-    tscwatch_start('test.ts')
+    tscwatch_start(['test.ts'])
     input('')
     tscwatch_stop()
-"""
+'''
