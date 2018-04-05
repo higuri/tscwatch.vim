@@ -24,7 +24,6 @@ class TscWatchThread(Thread):
     def run(self):
         cmd = self.CMD + self.args
         self.proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        vim.command('copen')
         while True:
             try:
                 line = self.proc.stdout.readline()
@@ -48,22 +47,23 @@ class TscWatchThread(Thread):
 # tscwatch_start:
 def tscwatch_start(args):
     global tscwatch_thread
+    vim.command('copen')
     if tscwatch_thread and tscwatch_thread.is_alive():
         print('Already started')
-    else:
-        tscwatch_thread = TscWatchThread(args)
-        tscwatch_thread.start()
+        return
+    tscwatch_thread = TscWatchThread(args)
+    tscwatch_thread.start()
 
 # tscwatch_stop:
-# TODO: autoexec stop on vim exit.
 def tscwatch_stop():
     global tscwatch_thread
-    if tscwatch_thread:
+    vim.command('cclose')
+    if tscwatch_thread is None:
+        return
+    if tscwatch_thread.is_alive():
         tscwatch_thread.stop()
         tscwatch_thread.join()
-        tscwatch_thread = None
-    else:
-        pass
+    tscwatch_thread = None
 
 """
 if __name__ == '__main__':
