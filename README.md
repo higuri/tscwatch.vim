@@ -20,31 +20,34 @@ Stop compilation by executing
 
 > `:TscWatchStop` is called automatically when vim exists.
 
-### Example
+Usage Example
+-------------
 
-Start tscwatch for 'example.ts'
+### Compile 'example.ts'
+
+Start tscwatch
 
     :TscWatchStart example.ts
 
-Edit 'example.ts' and save it.
+Edit 'example.ts' and save it
 
     :e example.ts
     ... some editing ...
     :w
 
 This triggers compilation and the output will be shown in cmdline or quickfix.
-* Compilation succeeded
 
+#### Compilation succeeded
 
     Done: tsc --watch example.ts
 
-* Compilation failed
-
+#### Compilation failed
 
     1 example.ts|2 col 17| error TS2304: Cannot find name 'foo'.
     2 example.ts|3 col 12| error TS2304: Cannot find name 'bar'.
     [Quickfix List] tsc --watch example.ts
 
+### Use tscconfig.json
 
 If you have 'tscconfig.json' in the current directory
 you can start tscwatch by simply running
