@@ -49,7 +49,7 @@ class TscWatchThread(Thread):
                     if isTscFailed:
                         vim.command('copen')
                     else:
-                        print('[OK] %s' % ' '.join(cmd))
+                        print('Done: %s' % ' '.join(cmd))
                 else:
                     if not isTscFailed:
                         isTscFailed = True
@@ -61,7 +61,7 @@ class TscWatchThread(Thread):
                                 '"lnum": %s,' % (m.group(2)) +
                                 '"col": %s,' % (m.group(3)) + 
                                 '"text": "%s"' % (m.group(4)) +
-                                '}])')
+                                '}], "a")')
                     else:
                         # unknown pattern
                         vim.command('caddexpr "%s"' % s)
