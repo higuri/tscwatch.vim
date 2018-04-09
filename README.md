@@ -25,13 +25,8 @@ Usage Example
 
 ### Compile 'example.ts'
 
-Start tscwatch
-
-    :TscWatchStart example.ts
-
-Edit 'example.ts' and save it
-
     :e example.ts
+    :TscWatchStart %
     ... some editing ...
     :w
 
@@ -47,16 +42,26 @@ This triggers compilation and the output will be shown in cmdline or quickfix.
     2 example.ts|3 col 12| error TS2304: Cannot find name 'bar'.
     [Quickfix List] tsc --watch example.ts
 
-### Use tscconfig.json
+### Use tsconfig.json
 
-If you have 'tscconfig.json' in the current directory
+If your project has 'tsconfig.json'
 you can start tscwatch by simply running
 
     :TscWatchStart
 
+> `tsc` searches for the tsconfig.json file starting in the current directory and continuing up the parent directory chain.
+
 
 Instalation
 -----------
+
+### Prerequisite
+
+* Vim compiled with Python 3+ support
+
+You can check by
+
+    $ vim --version | grep +python3
 
 ### Vundle
 
