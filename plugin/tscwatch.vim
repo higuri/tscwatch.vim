@@ -1,18 +1,23 @@
 "
 " plugin/tscwatch.vim
 "
+if exists('g:tscwatch_loaded')
+    finish
+endif
 
 " TODO: support python2.
 if !has('python3')
     echo 'ERROR: vim-tsc requires +python3'
     finish
 endif
-if exists("g:loaded_tscwatch")
-    finish
-endif
-let g:loaded_tscwatch = 1
+
+let g:tscwatch_loaded = 1
 let s:save_cpo = &cpo
 set cpo&vim
+
+if !exists('g:tscwatch_tsccmd')
+    let g:tscwatch_tsccmd = 'tsc'
+endif
 
 command! -nargs=* TscWatchStart call tscwatch#start(<f-args>)
 command! -nargs=0 TscWatchStop call tscwatch#stop()

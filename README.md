@@ -58,6 +58,7 @@ Instalation
 ### Prerequisite
 
 * Vim compiled with Python 3+ support
+* `tsc` in your PATH
 
 You can check by
 
@@ -65,11 +66,22 @@ You can check by
 
 ### Vundle
 
-If you have Vundle installed, add the following to your .vimrc
+If you have Vundle installed, add the following line to your .vimrc
 
     Plugin 'higuri/vim-tsc'
 
 and then run
 
     :PluginInstall
+
+
+Configuration
+-------------
+
+### Change `tsc` used by vim-tsc
+
+If you want to use `tsc` installed to the local node_modules directory,
+add the following line to your .vimrc
+
+    let g:tscwatch_tsccmd = 'npx tsc'
 

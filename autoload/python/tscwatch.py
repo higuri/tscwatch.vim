@@ -48,7 +48,6 @@ class TscWatchQuickFix(object):
 # TscWatchThread:
 class TscWatchThread(Thread):
 
-    CMD = ['tsc', '--watch']
     PAT_START = re.compile(
             r'\d{2}:\d{2}:\d{2} - .*Starting .*compilation.*\.\.\.')
     PAT_END = re.compile(
@@ -56,16 +55,19 @@ class TscWatchThread(Thread):
     PAT_ERROR = re.compile(
             r'(.+)\((\d+),(\d+)\): (.*)')
 
-    def __init__(self, args):
+    def __init__(self, cmd="tsc", args=[]):
         Thread.__init__(self)
+        self.cmd = cmd
         self.args = args
         self.proc = None
 
     def run(self):
-        cmd = self.CMD + self.args
-        self.proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        # self.cmd: 'tsc', 'npx tsc', ...
+        cmds = self.cmd.split(' ') + ['--watch'] + self.args
+        self.proc = Popen(cmds, stdout=PIPE, stderr=PIPE)
+        procname = ' '.join(cmds)
         qf = TscWatchQuickFix()
-        qf.init(title=' '.join(cmd))
+        qf.init(title=procname)
         isTscFailed = False
         while True:
             line = self.proc.stdout.readline()
@@ -76,13 +78,13 @@ class TscWatchThread(Thread):
                 continue
             if self.PAT_START.search(s) is not None:
                 isTscFailed = False
-                qf.init(title=' '.join(cmd))
+                qf.init(title=procname)
             elif self.PAT_END.search(s) is not None:
                 if isTscFailed:
                     qf.open()
                 else:
                     qf.close()
-                    print('Done: %s' % ' '.join(cmd))
+                    print('Done: %s' % procname)
             else:
                 if not isTscFailed:
                     isTscFailed = True
@@ -110,12 +112,12 @@ def _tscwatch_is_running():
         tscwatch_thread.is_alive())
 
 # tscwatch_start:
-def tscwatch_start(args):
+def tscwatch_start(cmd="tsc", args=[]):
     global tscwatch_thread
     if _tscwatch_is_running():
         print('Already started')
         return
-    tscwatch_thread = TscWatchThread(args)
+    tscwatch_thread = TscWatchThread(cmd, args)
     tscwatch_thread.start()
 
 # tscwatch_stop:
@@ -137,8 +139,7 @@ def tscwatch_is_running():
 
 """
 if __name__ == '__main__':
-    #  tscwatch_start(['test.ts'])
-    tscwatch_start([])
+    tscwatch_start('npx tsc', ['test.ts'])
     input('')
     tscwatch_stop()
 """

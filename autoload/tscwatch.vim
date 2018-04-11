@@ -8,8 +8,9 @@ python3 import vim
 execute 'py3file ' . s:pyfile
 
 function! tscwatch#start(...)
-    python3 args = [vim.eval('expand("%s")' % arg) for arg in vim.eval('a:000')]
-    python3 tscwatch_start(args)
+    python3 tscwatch_cmd = vim.eval('g:tscwatch_tsccmd')
+    python3 tscwatch_args = [vim.eval('expand("%s")' % arg) for arg in vim.eval('a:000')]
+    python3 tscwatch_start(tscwatch_cmd, tscwatch_args)
 endfunction
 
 function! tscwatch#stop()
