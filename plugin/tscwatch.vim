@@ -4,6 +4,7 @@
 
 " TODO: support python2.
 if !has('python3')
+    echo 'ERROR: vim-tsc requires +python3'
     finish
 endif
 if exists("g:loaded_tscwatch")
