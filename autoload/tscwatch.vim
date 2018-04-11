@@ -15,3 +15,7 @@ endfunction
 function! tscwatch#stop()
     python3 tscwatch_stop()
 endfunction
+
+function! tscwatch#is_running()
+    python3 tscwatch_is_running()
+endfunction
