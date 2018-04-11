@@ -7,8 +7,43 @@ import re
 from threading import Thread 
 from subprocess import Popen, PIPE
 
+"""
+class Stub(): pass
+vim = Stub()
+vim.command = print
+"""
+
 # TODO: cleanup
 tscwatch_thread = None
+
+# TscWatchQuickFix:
+class TscWatchQuickFix(object):
+
+    # init()
+    def init(self, title=""):
+        # clear
+        vim.command('call setqflist([], "r")')
+        # set title
+        vim.command('call setqflist([], "r", ' +
+            '{"title": "%s"})' % title)
+
+    # open()
+    def open(self):
+        vim.command('copen')
+
+    # close()
+    def close(self):
+        vim.command('cclose')
+
+    # append()
+    def append(self,
+        filename="", line=0, col=0, desc=""):
+        vim.command('call setqflist([{' +
+                '"filename": "%s",' % (filename) +
+                '"lnum": %d,' % (line) +
+                '"col": %d,' % (col) +
+                '"text": "%s"' % (desc) +
+                '}], "a")')
 
 # TscWatchThread:
 class TscWatchThread(Thread):
@@ -29,53 +64,55 @@ class TscWatchThread(Thread):
     def run(self):
         cmd = self.CMD + self.args
         self.proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        qf = TscWatchQuickFix()
+        qf.init(title=' '.join(cmd))
         isTscFailed = False
         while True:
-            try:
-                line = self.proc.stdout.readline()
-                if line == b'':
-                    break
-                s = line.decode('utf-8').strip()
-                if s == '':
-                    continue
-                if self.PAT_START.search(s) is not None:
-                    isTscFailed = False
-                    # clear
-                    vim.command('call setqflist([], "r")')
-                    # set title
-                    vim.command('call setqflist([], "r", ' +
-                        '{"title": "%s"})' % ' '.join(cmd))
-                elif self.PAT_END.search(s) is not None:
-                    if isTscFailed:
-                        vim.command('copen')
-                    else:
-                        print('Done: %s' % ' '.join(cmd))
-                else:
-                    if not isTscFailed:
-                        isTscFailed = True
-                    m = self.PAT_ERROR.search(s)
-                    if m is not None:
-                        # add error item
-                        vim.command('call setqflist([{' +
-                                '"filename": "%s",' % (m.group(1)) + 
-                                '"lnum": %s,' % (m.group(2)) +
-                                '"col": %s,' % (m.group(3)) + 
-                                '"text": "%s"' % (m.group(4)) +
-                                '}], "a")')
-                    else:
-                        # unknown pattern
-                        vim.command('caddexpr "%s"' % s)
-                vim.command('redraw')
-            except:
+            line = self.proc.stdout.readline()
+            if line == b'':
                 break
+            s = line.decode('utf-8').strip()
+            if s == '':
+                continue
+            if self.PAT_START.search(s) is not None:
+                isTscFailed = False
+                qf.init(title=' '.join(cmd))
+            elif self.PAT_END.search(s) is not None:
+                if isTscFailed:
+                    qf.open()
+                else:
+                    qf.close()
+                    print('Done: %s' % ' '.join(cmd))
+            else:
+                if not isTscFailed:
+                    isTscFailed = True
+                m = self.PAT_ERROR.search(s)
+                if m is not None:
+                    # append error.
+                    qf.append(
+                        filename=m.group(1),
+                        line=int(m.group(2)),
+                        col=int(m.group(3)),
+                        desc=m.group(4))
+                else:
+                    # unknown pattern
+                    qf.append(desc=s)
+                    qf.open()
+            vim.command('redraw')
 
     def stop(self):
         self.proc.kill()
 
+# _tscwatch_is_running:
+def _tscwatch_is_running():
+    global tscwatch_thread
+    return (tscwatch_thread is not None and
+        tscwatch_thread.is_alive())
+
 # tscwatch_start:
 def tscwatch_start(args):
     global tscwatch_thread
-    if tscwatch_thread and tscwatch_thread.is_alive():
+    if _tscwatch_is_running():
         print('Already started')
         return
     tscwatch_thread = TscWatchThread(args)
@@ -91,9 +128,17 @@ def tscwatch_stop():
         tscwatch_thread.join()
     tscwatch_thread = None
 
+# tscwatch_is_running:
+def tscwatch_is_running():
+    if _tscwatch_is_running():
+        print(1);
+    else:
+        print(0);
+
 """
 if __name__ == '__main__':
-    tscwatch_start(['test.ts'])
+    #  tscwatch_start(['test.ts'])
+    tscwatch_start([])
     input('')
     tscwatch_stop()
 """
