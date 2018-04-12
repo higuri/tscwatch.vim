@@ -27,6 +27,10 @@ class TscWatchQuickFix(object):
         vim.command('call setqflist([], "r", ' +
             '{"title": "%s"})' % title)
 
+    # _escape()
+    def _escape(self, s):
+        return s.replace('\'', '\\\'').replace('"', '\\"')
+
     # open()
     def open(self):
         vim.command('copen')
@@ -39,10 +43,10 @@ class TscWatchQuickFix(object):
     def append(self,
         filename="", line=0, col=0, desc=""):
         vim.command('call setqflist([{' +
-                '"filename": "%s",' % (filename) +
+                '"filename": "%s",' % (self._escape(filename)) +
                 '"lnum": %d,' % (line) +
                 '"col": %d,' % (col) +
-                '"text": "%s"' % (desc) +
+                '"text": "%s"' % (self._escape(desc)) +
                 '}], "a")')
 
 # TscWatchThread:
