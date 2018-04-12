@@ -1,7 +1,7 @@
 "
 " plugin/tscwatch.vim
 "
-if exists('g:tscwatch_loaded')
+if exists('g:loaded_tscwatch')
     finish
 endif
 
@@ -11,7 +11,7 @@ if !has('python3')
     finish
 endif
 
-let g:tscwatch_loaded = 1
+let g:loaded_tscwatch = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
@@ -21,6 +21,7 @@ endif
 
 command! -nargs=* TscWatchStart call tscwatch#start(<f-args>)
 command! -nargs=0 TscWatchStop call tscwatch#stop()
+command! -nargs=0 TscWatchRestart call tscwatch#restart()
 command! -nargs=0 TscWatchIsRunning call tscwatch#is_running()
 autocmd VimLeave * call tscwatch#stop()
 
