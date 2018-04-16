@@ -1,4 +1,4 @@
-vim-tsc
+tscwatch.vim
 ========
 
 Vim plugin to run the TypeScript compiler in watch mode.
@@ -68,7 +68,7 @@ You can check by
 
 If you have Vundle installed, add the following line to your .vimrc
 
-    Plugin 'higuri/vim-tsc'
+    Plugin 'higuri/tscwatch.vim
 
 and then run
 
@@ -78,7 +78,7 @@ and then run
 Configuration
 -------------
 
-### Change `tsc` used by vim-tsc
+### Change `tsc` used by tscwatch.vim
 
 If you want to use `tsc` installed to the local node_modules directory,
 add the following line to your .vimrc
