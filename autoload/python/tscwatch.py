@@ -4,6 +4,7 @@
 #
 
 import re
+import vim
 from threading import Thread 
 from subprocess import Popen, PIPE
 
