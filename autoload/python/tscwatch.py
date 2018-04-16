@@ -9,19 +9,20 @@ from threading import Thread
 from subprocess import Popen, PIPE
 
 """
+# For debugging.
 class Stub(): pass
 vim = Stub()
 vim.command = print
+vim.eval = lambda s: s
 """
 
-# TODO: cleanup
-tscwatch_thread = None
-
-# TscWatchQuickFix:
-class TscWatchQuickFix(object):
+##
+##  QuickFix
+##
+class QuickFix(object):
 
     # init()
-    def init(self, title=""):
+    def init(self, title=''):
         # clear
         vim.command('call setqflist([], "r")')
         # set title
@@ -42,7 +43,7 @@ class TscWatchQuickFix(object):
 
     # append()
     def append(self,
-        filename="", line=0, col=0, desc=""):
+        filename='', line=0, col=0, desc=''):
         vim.command('call setqflist([{' +
                 '"filename": "%s",' % (self._escape(filename)) +
                 '"lnum": %d,' % (line) +
@@ -50,7 +51,9 @@ class TscWatchQuickFix(object):
                 '"text": "%s"' % (self._escape(desc)) +
                 '}], "a")')
 
-# TscWatchThread:
+##
+##  TscWatchThread
+##
 class TscWatchThread(Thread):
 
     PAT_START = re.compile(
@@ -60,18 +63,15 @@ class TscWatchThread(Thread):
     PAT_ERROR = re.compile(
             r'(.+)\((\d+),(\d+)\): (.*)')
 
-    def __init__(self, cmd="tsc", args=[]):
+    def __init__(self, cmds=[]):
         Thread.__init__(self)
-        self.cmd = cmd
-        self.args = args
+        self.cmds = cmds
         self.proc = None
 
     def run(self):
-        # self.cmd: 'tsc', 'npx tsc', ...
-        cmds = self.cmd.split(' ') + ['--watch'] + self.args
-        self.proc = Popen(cmds, stdout=PIPE, stderr=PIPE)
-        procname = ' '.join(cmds)
-        qf = TscWatchQuickFix()
+        self.proc = Popen(self.cmds, stdout=PIPE, stderr=PIPE)
+        procname = ' '.join(self.cmds)
+        qf = QuickFix()
         qf.init(title=procname)
         isTscFailed = False
         while True:
@@ -110,41 +110,66 @@ class TscWatchThread(Thread):
     def stop(self):
         self.proc.kill()
 
-# _tscwatch_is_running:
-def _tscwatch_is_running():
-    global tscwatch_thread
-    return (tscwatch_thread is not None and
-        tscwatch_thread.is_alive())
 
-# tscwatch_start:
-def tscwatch_start(cmd="tsc", args=[]):
-    global tscwatch_thread
-    if _tscwatch_is_running():
-        print('Already started')
-        return
-    tscwatch_thread = TscWatchThread(cmd, args)
-    tscwatch_thread.start()
+##
+##  TscWatchRunner
+##
+class TscWatchRunner(object):
 
-# tscwatch_stop:
-def tscwatch_stop():
-    global tscwatch_thread
-    if tscwatch_thread is None:
-        return
-    if tscwatch_thread.is_alive():
-        tscwatch_thread.stop()
-        tscwatch_thread.join()
-    tscwatch_thread = None
+    def __init__(self):
+        self.tsc_thread = None
 
-# tscwatch_is_running:
-def tscwatch_is_running():
-    if _tscwatch_is_running():
-        print(1);
-    else:
-        print(0);
+    # _is_running:
+    def _is_running(self):
+        return (self.tsc_thread is not None and
+            self.tsc_thread.is_alive())
+
+    # start:
+    #  cmd: TypeScript compiler (e.g. 'tsc' or 'npx tsc')
+    #  arg: argument string to tsc (e.g. 'foo.ts --noImplicitAny')
+    def start(self, cmd='tsc', arg=''):
+        if self._is_running():
+            print('Already started')
+            return
+        # arg -> arg
+        # * str -> list
+        # * Vim variables (e.g. '%') -> value
+        args = [vim.eval('expand("%s")' % s)
+            for s in arg.split(' ') if s != '']
+        cmds = cmd.split(' ') + ['--watch'] + args
+        self.tsc_thread = TscWatchThread(cmds)
+        self.tsc_thread.start()
+
+    # stop:
+    def stop(self):
+        if self.tsc_thread is None:
+            return
+        if self.tsc_thread.is_alive():
+            self.tsc_thread.stop()
+            self.tsc_thread.join()
+        self.tsc_thread = None
+
+    # restart
+    def restart(self):
+        if self._is_running():
+            cmds = self.tsc_thread.cmds
+            self.stop()
+            self.tsc_thread = TscWatchThread(cmds)
+            self.tsc_thread.start()
+        else:
+            print('Not started')
+
+    # is_running:
+    def is_running(self):
+        if self._is_running():
+            print(1);
+        else:
+            print(0);
 
 """
 if __name__ == '__main__':
-    tscwatch_start('npx tsc', ['test.ts'])
+    tscwatch = TscWatchRunner()
+    tscwatch.start('npx tsc', 'test.ts')
     input('')
-    tscwatch_stop()
+    tscwatch.stop()
 """

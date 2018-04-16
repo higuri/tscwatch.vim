@@ -10,32 +10,29 @@ import vim
 sys.path.append(os.path.join(
     (os.path.dirname(vim.eval('expand("<sfile>")'))),
     'python'))
-from tscwatch import tscwatch_start
-from tscwatch import tscwatch_stop
-from tscwatch import tscwatch_is_running
+from tscwatch import TscWatchRunner
 sys.path.pop()
+tscwatch = TscWatchRunner()
 endpython
 
-python3 tscwatch_cmd = vim.eval('g:tscwatch_tsccmd')
-let s:lastargs = []
+
 function! tscwatch#start(...)
-    python3 tscwatch_args = [vim.eval('expand("%s")' % arg) for arg in vim.eval('a:000')]
-    python3 vim.command('let s:lastargs = %r' % tscwatch_args)
-    python3 tscwatch_start(tscwatch_cmd, tscwatch_args)
+    if 0 < a:0
+        let l:lastarg = a:1
+    else
+        let l:lastarg = ''
+    endif
+    python3 tscwatch.start(vim.eval('g:tscwatch_tsccmd'), vim.eval('l:lastarg'))
 endfunction
 
 function! tscwatch#stop()
-    python3 tscwatch_stop()
+    python3 tscwatch.stop()
 endfunction
 
 function! tscwatch#restart()
-    " stop
-    python3 tscwatch_stop()
-    " start with last arguments
-    python3 lastargs = vim.eval('s:lastargs')
-    python3 tscwatch_start(tscwatch_cmd, lastargs)
+    python3 tscwatch.restart()
 endfunction
 
 function! tscwatch#is_running()
-    python3 tscwatch_is_running()
+    python3 tscwatch.is_running()
 endfunction

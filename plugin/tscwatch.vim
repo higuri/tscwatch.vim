@@ -18,7 +18,7 @@ if !exists('g:tscwatch_tsccmd')
     let g:tscwatch_tsccmd = 'tsc'
 endif
 
-command! -nargs=* TscWatchStart call tscwatch#start(<f-args>)
+command! -nargs=? TscWatchStart call tscwatch#start(<f-args>)
 command! -nargs=0 TscWatchStop call tscwatch#stop()
 command! -nargs=0 TscWatchRestart call tscwatch#restart()
 command! -nargs=0 TscWatchIsRunning call tscwatch#is_running()
