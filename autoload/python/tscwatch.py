@@ -4,17 +4,17 @@
 #
 
 import re
-import vim
 from threading import Thread 
 from subprocess import Popen, PIPE
 
-"""
-# For debugging.
-class Stub(): pass
-vim = Stub()
-vim.command = print
-vim.eval = lambda s: s
-"""
+if __name__ == '__main__':
+    # for Debugging
+    class Stub(): pass
+    vim = Stub()
+    vim.command = print
+    vim.eval = lambda s: s
+else:
+    import vim
 
 ##
 ##  QuickFix
@@ -166,10 +166,9 @@ class TscWatchRunner(object):
         else:
             print(0);
 
-"""
+
 if __name__ == '__main__':
     tscwatch = TscWatchRunner()
     tscwatch.start('npx tsc', 'test.ts')
     input('')
     tscwatch.stop()
-"""
